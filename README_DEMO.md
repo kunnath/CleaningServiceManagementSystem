@@ -46,13 +46,6 @@ cd SauberHeldPro
 - **Localized Formatting**: Currency, dates, and numbers in local format
 - **Real-time Updates**: No page reload required
 
-### 💳 **Secure Payment Integration** 🆕
-- **PayPal Integration**: Secure deposit payment required before booking confirmation
-- **4-Step Booking Process**: Service → Date/Time → Contact → **Payment**
-- **Deposit System**: Only first hour payment upfront, remaining after service
-- **No Booking Without Payment**: Guaranteed revenue with payment validation
-- **Multi-Currency**: EUR support with international expansion ready
-
 ### 🌐 **Modern Customer Website**
 - **Professional Design**: Clean, modern interface
 - **Responsive Layout**: Perfect on desktop, tablet, and mobile
@@ -89,23 +82,13 @@ cd SauberHeldPro
    - Switch from 🇬🇧 English to 🇩🇪 Deutsch
    - **Watch entire interface translate instantly**
 
-3. **Complete Full Booking Flow** (In German)
+3. **Book a Service** (In German)
    - Navigate to "Dienstleistungen" (Services)
    - Select "Grundreinigung" (Basic Cleaning)
-   - Choose date and time from calendar
-   - Fill contact information form in German
-   - **🆕 Payment Step**: Secure PayPal deposit payment
+   - Complete booking form in German
    - See localized pricing (€45,00 format)
-   - **Booking confirmed only after payment success**
 
-4. **Test Payment Integration** 💳 **NEW FEATURE**
-   - Complete booking steps 1-3
-   - Reach secure payment step
-   - Test with PayPal sandbox account
-   - Experience real-time payment processing
-   - Receive booking confirmation with payment ID
-
-5. **Contact Page** (Multilingual)
+4. **Contact Page** (Multilingual)
    - Visit "Kontakt" page
    - View business information
    - **Address**: Glockenblumenweg 131A, 12357 Berlin
@@ -128,23 +111,15 @@ cd SauberHeldPro
    - **Analytics**: Revenue charts and metrics
    - **Customer Database**: Search and filter customers
 
-### Part 3: Payment & Integration Demo (5 minutes)
+### Part 3: Integration Demo (3 minutes)
 
-1. **Payment Security Demonstration** 💳
-   - Show secure PayPal integration
-   - Demonstrate deposit-only payment system
-   - Explain payment validation before booking
-   - Test payment error handling
-
-2. **Show Real-time Sync**
-   - Make booking with payment on website → Appears in admin instantly
+1. **Show Real-time Sync**
+   - Make booking on website → Appears in admin instantly
    - Update job status in admin → Customer can see updates
-   - View payment tracking and booking status
 
-3. **Demonstrate Scalability**
+2. **Demonstrate Scalability**
    - Show framework ready for additional languages
    - Explain easy expansion to new markets
-   - Highlight payment system international readiness
 
 ---
 
@@ -155,14 +130,6 @@ cd SauberHeldPro
 - **Professional Image**: Modern website builds customer trust
 - **Competitive Edge**: Most competitors lack proper multilingual support
 - **Customer Self-Service**: Reduces admin workload with online booking
-- **🆕 Guaranteed Revenue**: Secure payment collection before service delivery
-
-### ✅ **Payment & Revenue Benefits** 💰
-- **Automated Payment Collection**: No manual payment processing needed
-- **Reduced No-Shows**: Payment commitment increases customer reliability
-- **Faster Cash Flow**: Deposits collected immediately upon booking
-- **Professional Trust**: Secure PayPal integration builds customer confidence
-- **International Expansion**: Multi-currency payment support ready
 
 ### ✅ **Operational Efficiency**
 - **Unified System**: Everything in one platform
@@ -182,7 +149,6 @@ cd SauberHeldPro
 
 ### **Modern Technology Stack**
 - **Frontend**: React.js 18.2.0 with modern hooks and components
-- **Payment**: PayPal React SDK with secure EUR processing
 - **Backend**: Node.js/Express with RESTful API architecture
 - **Admin Portal**: Python/Streamlit for rapid development
 - **Database**: SQLite with full CRUD operations
@@ -190,44 +156,33 @@ cd SauberHeldPro
 
 ### **Professional Features**
 - **Responsive Design**: Mobile-first approach
-- **Payment Security**: Enterprise-grade PayPal integration
 - **Performance Optimized**: Fast loading and smooth animations
 - **SEO Ready**: Proper meta tags and structured data
 - **Analytics Ready**: Google Analytics integration prepared
 - **Error Handling**: Comprehensive error management and logging
-- **🆕 Payment Validation**: Booking confirmation only after successful payment
 
 ---
 
 ## 📊 Demo Scenarios
 
-### **Scenario 1: German Customer Journey with Payment**
+### **Scenario 1: German Customer Journey**
 ```
 German visitor → Switches to Deutsch → Books "Grundreinigung" 
-→ Fills form in German → 💳 Pays deposit via PayPal
-→ Receives booking confirmation with payment ID
+→ Fills form in German → Receives German confirmation 
 → Booking appears in admin portal → German-speaking cleaner assigned
 ```
 
-### **Scenario 2: Business Operations with Revenue**
+### **Scenario 2: Business Operations**
 ```
-Morning dashboard check → View paid bookings → Assign cleaners to jobs
-→ Customer inquiry → Find customer with payment status instantly 
-→ New web booking + payment notification → Real-time schedule update 
-→ Complete job → Generate final invoice for remaining balance
-```
-
-### **Scenario 3: Payment Security Demo**
-```
-Start booking → Fill all details → Reach payment step
-→ Test PayPal payment → Show secure processing → Payment success
-→ Booking confirmed → Admin sees paid booking → Customer receives confirmation
+Morning dashboard check → Assign cleaners to jobs → Customer inquiry 
+→ Find customer instantly → New web booking notification 
+→ Real-time schedule update → Complete job → Generate invoice
 ```
 
-### **Scenario 4: International Expansion**
+### **Scenario 3: International Expansion**
 ```
-Current: EN/DE support + EUR payments → Add new language (ES/FR/IT) 
-→ Add currency support → Update translations → Deploy → New market ready
+Current: EN/DE support → Add new language (ES/FR/IT) 
+→ Update translations → Deploy → New market ready
 ```
 
 ---
@@ -236,12 +191,7 @@ Current: EN/DE support + EUR payments → Add new language (ES/FR/IT)
 
 ### **Key Moments to Highlight**
 1. ⭐ **Language switching speed** - The instant translation effect
-2. � **Payment integration** - Secure PayPal deposit processing
-3. �📱 **Mobile responsiveness** - Test on phone/tablet view
-4. 🔄 **Real-time sync** - Booking with payment appears immediately in admin
-5. 🎨 **Professional design** - Compare to competitors
-6. 🌍 **International readiness** - Future expansion capability
-7. 💰 **Revenue guarantee** - No booking without payment confirmation
+2. 📱 **Mobile responsiveness** - Test on phone/tablet view
 3. 🔄 **Real-time sync** - Booking appears immediately in admin
 4. 🎨 **Professional design** - Compare to competitors
 5. 🌍 **International readiness** - Future expansion capability

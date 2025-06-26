@@ -294,7 +294,7 @@ const Header = () => {
         <div className="container">
           <HeaderContent>
             <Logo to="/">
-              SauberHeld<span>Pro</span>
+              GRK Dienstleistungen<span>Pro</span>
             </Logo>
             
             <Nav>

@@ -139,7 +139,7 @@ const Footer = () => {
             </ContactItem>
             <ContactItem>
               <FaMapMarkerAlt />
-              <span>Hauptstr 117, 10827 Berlin, Deutschland</span>
+              <span>Glockenblumenweg 131A, 12357 Berlin, Deutschland</span>
             </ContactItem>
             <ContactItem>
               <FaClock />
@@ -167,14 +167,14 @@ const Footer = () => {
             <p style={{ color: '#999', fontSize: '0.9rem' }}>
               Professional Cleaning Services<br />
               Licensed & Insured<br />
-              Est. 2016
+              Est. 1990
             </p>
           </FooterSection>
         </FooterContent>
         
         <FooterBottom>
           <p>© 2025 GRK Dienstleistungen. All rights reserved.</p>
-          <p>GRK Dienstleistungen | Hauptstr 117, 10827 Berlin, Deutschland | Registry Code: DE123456789</p>
+          <p>GRK Dienstleistungen | Glockenblumenweg 131A, 12357 Berlin, Deutschland | Registry Code: DE123456789</p>
           
           <PaymentMethods>
             <div style={{ 

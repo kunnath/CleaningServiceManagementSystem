@@ -5,8 +5,9 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { FaCheck, FaArrowLeft, FaArrowRight, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaUser, FaEnvelope, FaPhone } from 'react-icons/fa';
+import { FaCheck, FaArrowLeft, FaArrowRight, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaUser, FaEnvelope, FaPhone, FaCreditCard, FaLock, FaShieldAlt } from 'react-icons/fa';
 import { useLanguage } from '../contexts/LanguageContext';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import axios from 'axios';
 
 const BookingContainer = styled.div`
@@ -266,6 +267,91 @@ const ErrorMessage = styled.span`
   display: block;
 `;
 
+const PaymentContainer = styled.div`
+  background: white;
+  border-radius: 15px;
+  padding: ${props => props.theme.spacing.xl};
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin-bottom: ${props => props.theme.spacing.lg};
+`;
+
+const PaymentHeader = styled.div`
+  text-align: center;
+  margin-bottom: ${props => props.theme.spacing.xl};
+  
+  h3 {
+    color: ${props => props.theme.colors.dark};
+    margin-bottom: ${props => props.theme.spacing.sm};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: ${props => props.theme.spacing.sm};
+  }
+  
+  p {
+    color: ${props => props.theme.colors.gray};
+    font-size: 1.1rem;
+  }
+`;
+
+const PaymentSummary = styled.div`
+  background: ${props => props.theme.colors.light};
+  border-radius: 10px;
+  padding: ${props => props.theme.spacing.lg};
+  margin-bottom: ${props => props.theme.spacing.xl};
+`;
+
+const PaymentRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${props => props.theme.spacing.sm};
+  
+  &:last-child {
+    margin-bottom: 0;
+    padding-top: ${props => props.theme.spacing.sm};
+    border-top: 2px solid ${props => props.theme.colors.secondary};
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+`;
+
+const SecurityInfo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${props => props.theme.spacing.sm};
+  color: ${props => props.theme.colors.gray};
+  font-size: 0.9rem;
+  margin-bottom: ${props => props.theme.spacing.lg};
+  
+  svg {
+    color: ${props => props.theme.colors.success};
+  }
+`;
+
+const PaymentStatus = styled.div`
+  text-align: center;
+  padding: ${props => props.theme.spacing.lg};
+  border-radius: 10px;
+  margin-bottom: ${props => props.theme.spacing.lg};
+  
+  &.success {
+    background: ${props => props.theme.colors.success};
+    color: white;
+  }
+  
+  &.error {
+    background: ${props => props.theme.colors.danger};
+    color: white;
+  }
+  
+  &.processing {
+    background: ${props => props.theme.colors.accent};
+    color: white;
+  }
+`;
+
 const BookingPage = () => {
   const { t } = useLanguage();
   const location = useLocation();
@@ -279,6 +365,12 @@ const BookingPage = () => {
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [postalCode, setPostalCode] = useState(location.state?.postalCode || '');
+  
+  // Payment state
+  const [paymentStatus, setPaymentStatus] = useState(null); // null, 'processing', 'success', 'error'
+  const [paymentError, setPaymentError] = useState('');
+  const [bookingData, setBookingData] = useState(null);
+  const [paymentId, setPaymentId] = useState(null);
 
   const services = [
     {
@@ -325,7 +417,7 @@ const BookingPage = () => {
   };
 
   const handleNext = () => {
-    if (currentStep < 3) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -336,20 +428,78 @@ const BookingPage = () => {
     }
   };
 
-  const onSubmit = async (data) => {
-    setLoading(true);
+  // Handle contact form submission (Step 3)
+  const onContactSubmit = async (data) => {
+    const fullBookingData = {
+      ...data,
+      service: selectedService,
+      date: selectedDate,
+      time: selectedTime,
+      postalCode,
+      totalPrice: selectedService?.price * selectedService?.duration,
+      depositAmount: selectedService?.price
+    };
+    
+    setBookingData(fullBookingData);
+    setCurrentStep(4); // Move to payment step
+  };
+
+  // PayPal payment handlers
+  const createPayPalOrder = (data, actions) => {
+    if (!selectedService) return;
+    
+    const depositAmount = selectedService.price.toFixed(2);
+    
+    return actions.order.create({
+      purchase_units: [{
+        amount: {
+          value: depositAmount,
+          currency_code: 'EUR'
+        },
+        description: `Deposit for ${selectedService.name} - ${selectedDate?.toLocaleDateString()} at ${selectedTime}`
+      }]
+    });
+  };
+
+  const onPayPalApprove = async (data, actions) => {
+    setPaymentStatus('processing');
+    
     try {
-      const bookingData = {
-        ...data,
-        service: selectedService,
-        date: selectedDate,
-        time: selectedTime,
-        postalCode,
-        totalPrice: selectedService?.price * selectedService?.duration
+      const order = await actions.order.capture();
+      setPaymentId(order.id);
+      setPaymentStatus('success');
+      
+      // Complete the booking after successful payment
+      await completeBooking(order);
+    } catch (error) {
+      console.error('Payment capture error:', error);
+      setPaymentStatus('error');
+      setPaymentError(t('payment-error'));
+    }
+  };
+
+  const onPayPalError = (error) => {
+    console.error('PayPal error:', error);
+    setPaymentStatus('error');
+    setPaymentError(t('payment-error'));
+  };
+
+  const onPayPalCancel = () => {
+    setPaymentStatus(null);
+    setPaymentError(t('payment-cancelled'));
+  };
+
+  const completeBooking = async (paymentOrder) => {
+    try {
+      const finalBookingData = {
+        ...bookingData,
+        paymentId: paymentOrder.id,
+        paymentStatus: 'completed',
+        paymentAmount: paymentOrder.purchase_units[0].amount.value
       };
       
-      // Simulate API call (replace with actual API call)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Simulate API call to save booking (replace with actual API call)
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Generate booking ID
       const bookingId = 'BS' + Date.now();
@@ -360,16 +510,16 @@ const BookingPage = () => {
         service: selectedService?.name || 'Cleaning Service',
         date: selectedDate?.toLocaleDateString() || new Date().toLocaleDateString(),
         time: selectedTime || '10:00 AM',
-        address: data.address || 'Your specified location'
+        address: bookingData?.address || 'Your specified location',
+        paymentId: paymentOrder.id
       });
       
       // Redirect to success page with booking details
       navigate(`/booking/success?${successUrl.toString()}`);
     } catch (error) {
-      console.error('Booking failed:', error);
-      // You can add error handling here
-    } finally {
-      setLoading(false);
+      console.error('Booking completion failed:', error);
+      setPaymentStatus('error');
+      setPaymentError('Booking could not be completed. Please contact support.');
     }
   };
 
@@ -521,7 +671,7 @@ const BookingPage = () => {
       exit={{ opacity: 0, x: -50 }}
       transition={{ duration: 0.3 }}
     >
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onContactSubmit)}>
         <FormGrid>
           <FormSection>
             <h3><FaUser /> Contact Information</h3>
@@ -623,10 +773,104 @@ const BookingPage = () => {
     </StepContent>
   );
 
+  const renderStep4 = () => (
+    <StepContent
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -50 }}
+      transition={{ duration: 0.3 }}
+    >
+      <PaymentContainer>
+        <PaymentHeader>
+          <h3>
+            <FaCreditCard />
+            {t('secure-payment')}
+          </h3>
+          <p>{t('secure-payment-desc')}</p>
+        </PaymentHeader>
+
+        <PaymentSummary>
+          <h4>{t('payment-summary')}</h4>
+          <PaymentRow>
+            <span>{t('selected-service')}:</span>
+            <span>{selectedService?.name}</span>
+          </PaymentRow>
+          <PaymentRow>
+            <span>{t('scheduled-date')}:</span>
+            <span>{selectedDate?.toLocaleDateString()} at {selectedTime}</span>
+          </PaymentRow>
+          <PaymentRow>
+            <span>{t('total-service-cost')}:</span>
+            <span>€{selectedService ? (selectedService.price * selectedService.duration).toFixed(2) : '0.00'}</span>
+          </PaymentRow>
+          <PaymentRow>
+            <span>{t('remaining-after-service')}:</span>
+            <span>€{selectedService ? ((selectedService.price * selectedService.duration) - selectedService.price).toFixed(2) : '0.00'}</span>
+          </PaymentRow>
+          <PaymentRow>
+            <span>{t('deposit-amount')}:</span>
+            <strong>€{selectedService?.price.toFixed(2) || '0.00'}</strong>
+          </PaymentRow>
+        </PaymentSummary>
+
+        <SecurityInfo>
+          <FaShieldAlt />
+          <span>{t('payment-protected')}</span>
+        </SecurityInfo>
+
+        {paymentStatus === 'processing' && (
+          <PaymentStatus className="processing">
+            <FaClock />
+            <div>{t('payment-processing')}</div>
+          </PaymentStatus>
+        )}
+
+        {paymentStatus === 'success' && (
+          <PaymentStatus className="success">
+            <FaCheck />
+            <div>{t('payment-success')}</div>
+            <div>{t('booking-confirmed-payment')}</div>
+          </PaymentStatus>
+        )}
+
+        {paymentStatus === 'error' && (
+          <PaymentStatus className="error">
+            <div>{t('payment-failed')}</div>
+            <div>{paymentError}</div>
+          </PaymentStatus>
+        )}
+
+        {!paymentStatus || paymentStatus === 'error' ? (
+          <PayPalScriptProvider
+            options={{
+              "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID || "test", // Replace with actual PayPal client ID
+              currency: "EUR",
+              intent: "capture"
+            }}
+          >
+            <PayPalButtons
+              createOrder={createPayPalOrder}
+              onApprove={onPayPalApprove}
+              onError={onPayPalError}
+              onCancel={onPayPalCancel}
+              style={{
+                layout: "vertical",
+                color: "blue",
+                shape: "rect",
+                label: "paypal"
+              }}
+            />
+          </PayPalScriptProvider>
+        ) : null}
+      </PaymentContainer>
+    </StepContent>
+  );
+
   const steps = [
     { number: 1, label: t('select-service-step') },
     { number: 2, label: t('choose-date-time') },
-    { number: 3, label: t('contact-details-step') }
+    { number: 3, label: t('contact-details-step') },
+    { number: 4, label: t('payment-step') }
   ];
 
   const canProceed = () => {
@@ -637,6 +881,8 @@ const BookingPage = () => {
         return selectedDate && selectedTime;
       case 3:
         return true;
+      case 4:
+        return paymentStatus === 'success';
       default:
         return false;
     }
@@ -668,13 +914,14 @@ const BookingPage = () => {
           {currentStep === 1 && renderStep1()}
           {currentStep === 2 && renderStep2()}
           {currentStep === 3 && renderStep3()}
+          {currentStep === 4 && renderStep4()}
           
           <ButtonGroup>
             <Button
               type="button"
               className="secondary"
               onClick={handlePrevious}
-              disabled={currentStep === 1}
+              disabled={currentStep === 1 || paymentStatus === 'processing'}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -694,17 +941,31 @@ const BookingPage = () => {
                 {t('continue')}
                 <FaArrowRight />
               </Button>
-            ) : (
+            ) : currentStep === 3 ? (
               <Button
                 type="submit"
                 className="primary"
-                onClick={handleSubmit(onSubmit)}
+                onClick={handleSubmit(onContactSubmit)}
                 disabled={loading}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {loading ? t('processing') : t('book-service-now')}
+                {loading ? t('processing') : t('continue')}
+                <FaArrowRight />
               </Button>
+            ) : (
+              // Step 4 - Payment step (no button needed, PayPal handles it)
+              paymentStatus === 'success' && (
+                <Button
+                  type="button"
+                  className="primary"
+                  disabled={true}
+                  style={{ opacity: 0.7 }}
+                >
+                  <FaCheck />
+                  {t('payment-success')}
+                </Button>
+              )
             )}
           </ButtonGroup>
         </BookingForm>
